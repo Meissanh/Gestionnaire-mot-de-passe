@@ -1,0 +1,138 @@
+import random
+import string
+import tkinter as tk
+from tkinter import messagebox, simpledialog
+import re
+
+longueur_mot_de_passe = int(input("Quelle longueur de mdp souhaitez-vous ? "))
+
+def generer_mot_de_passe():
+    caracteres = string.ascii_letters + string.digits + string.punctuation
+    mot_de_passe = ''.join(random.choice(caracteres) for _ in range(longueur_mot_de_passe)) #Ajoute caracteres au hasard en fonction de la longueur de longueur_mot_de_passe
+    entree_mot_de_passe.delete(0, tk.END) #Pour effacer la ligne
+    entree_mot_de_passe.insert(tk.END, mot_de_passe) #Pour insérer dans la ligne mot_de_passe
+
+def enregistrer_mot_de_passe():
+    site_web = entree_site_web.get()
+    utilisateur = entree_utilisateur.get()
+    mot_de_passe = entree_mot_de_passe.get()
+    if not site_web or not utilisateur or not mot_de_passe:
+        messagebox.showerror("Erreur", "Un champ n'a pas été rempli correctement", parent=window) #Fenêtre erreur
+        return
+    fichier = "mots_de_passe.txt"
+
+    with open(fichier, 'a') as f:
+        f.write(f'Site: {site_web}\n')
+        f.write(f'Utilisateur: {utilisateur}\n')
+        f.write(f'Mot de passe: {mot_de_passe}\n')
+        f.write('~~~~~~~~~~~~~~~~'  + '\n')
+
+    entree_site_web.delete(0, tk.END)
+    entree_utilisateur.delete(0, tk.END)
+    entree_mot_de_passe.delete(0, tk.END)
+
+def afficher_mots_de_passe():
+    mot_de_passe_verification = entree_verification.get()
+
+    mot_de_passe_verifie = "NSI"
+
+    if mot_de_passe_verification == mot_de_passe_verifie:
+        fichier = "mots_de_passe.txt"
+        with open(fichier, 'r') as f:
+            mots_de_passe = f.read()
+            text_mots_de_passe.delete(1.0, tk.END)
+            text_mots_de_passe.insert(tk.END, mots_de_passe)
+    else:
+        
+        messagebox.showerror("Erreur", "Mot de passe de vérification incorrect", parent=window)
+
+    entree_verification.delete(0, tk.END)
+
+        
+def tester_force_mot_de_passe():
+    mot_de_passe = entree_mot_de_passe.get()
+    score = 0
+    LI = []
+
+    if len(mot_de_passe) >= 8:
+        score += 1
+    else:
+        LI.append("Votre mot de passe n'a pas plus de 8 caractères")
+
+    if re.search(r'[a-z]', mot_de_passe):
+        score += 1
+    else:
+        LI.append("Votre mot de passe ne contient pas de minuscules")
+
+    if re.search(r'[A-Z]', mot_de_passe):
+        score += 1
+    else:
+        LI.append("Votre mot de passe ne contient pas de majuscules")
+
+    if re.search(r'\d', mot_de_passe):
+        score += 1
+    else:
+        LI.append("Votre mot de passe ne contient pas de chiffres")
+
+    if re.search(r'[!@#$%^&*(),.?":{}|<>]', mot_de_passe):
+        score += 1
+    else:
+        LI.append("Votre mot de passe ne contient pas de caractères spéciaux")
+
+    commentaires_mots_de_passe.delete(1.0, tk.END)
+    commentaires_mots_de_passe.insert(tk.END, '\n'.join(LI))
+    label_force.configure(text=f"Force du mot de passe : {score}/5")
+
+
+
+# Interface
+
+window = tk.Tk()
+window.title("Gestionnaire/Générateur/Testeur de mots de passe")
+
+label_site_web = tk.Label(window, text="Site web :")
+label_site_web.pack()
+entree_site_web = tk.Entry(window)
+entree_site_web.pack()
+
+label_utilisateur = tk.Label(window, text="Nom utilisateur :")
+label_utilisateur.pack()
+entree_utilisateur = tk.Entry(window)
+entree_utilisateur.pack()
+
+label_mot_de_passe = tk.Label(window, text="Mot de passe :")
+label_mot_de_passe.pack()
+entree_mot_de_passe = tk.Entry(window)
+entree_mot_de_passe.pack()
+
+button_enregistrer = tk.Button(window, text="Enregistrer", command=enregistrer_mot_de_passe)
+button_enregistrer.pack()
+
+button_generer = tk.Button(window, text="Générer mot de passe", command=generer_mot_de_passe)
+button_generer.pack()
+
+label_mots_de_passe = tk.Label(window, text="Mots de passe enregistrés:")
+label_mots_de_passe.pack()
+text_mots_de_passe = tk.Text(window, height=10, width=50)
+text_mots_de_passe.pack()
+
+label_verification = tk.Label(window, text="Mot de passe de vérification :")
+label_verification.pack()
+entree_verification = tk.Entry(window, show="*")
+entree_verification.pack()
+
+button_afficher = tk.Button(window, text="Afficher mots de passe", command=afficher_mots_de_passe)
+button_afficher.pack()
+
+label_force = tk.Label(window, text="Force du mot de passe : 0/5")
+label_force.pack()
+
+button_afficher = tk.Button(window, text="Tester mot de passe", command=tester_force_mot_de_passe)
+button_afficher.pack()
+label_commentaires_mots_de_passe = tk.Label(window, text="Vérification de la force du mot de passe :")
+label_commentaires_mots_de_passe.pack()
+
+commentaires_mots_de_passe = tk.Text(window, height=10, width=50)
+commentaires_mots_de_passe.pack()
+
+window.mainloop()
